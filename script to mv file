@@ -1,0 +1,15 @@
+filetemp=(testa testb)
+for filet in ${filetemp[@]}
+do
+    echo `date` "|INFO| Files ready to move about "$filet ",files :" `ls -l|grep $filet|grep -v ^d|awk '{print $9}'` >> log
+    files=`ls -l|grep $filet|grep -v ^d|awk '{print $9}'`
+    for file in ${files[@]}
+    do
+        echo `date` "|INFO| moving: "$file >> log
+        mv $file $filet
+        if [ $? -ne 0 ];then
+        echo `date` "|ERROR|" $file "move fail"
+        fi
+    done
+done
+
