@@ -1,0 +1,31 @@
+#!/bin/bash
+
+URL=mysftp@192.168.66.136
+TMPFILE=/root/script/test
+KeyPath=/root/136k
+space=""
+tr="|"
+echo 'ls -1l' > $TMPFILE
+
+function handle_dir {
+  #echo "====== $1 ========="
+  local dir=$1
+  sftp -b $TMPFILE -oIdentityFile=$KeyPath "$URL:$dir" | tail -n +2 | while read info; do
+    echo " $2$tr    $dir ; $info" >> log_tmp
+    if egrep -q '^d' <<< $info; then
+       info=$(echo $info)
+       subdir=$(cut -d ' ' -f9- <<< $info)
+       tr="\\"
+       space="`echo $2`|"
+       handle_dir "$dir/$subdir" "$space"
+    fi
+    tr="|"
+  done
+}
+>log_tmp
+echo "--------------------------------`date`--------------------------------" >> log
+handle_dir "." $space
+
+#cat log_tmp| sort -t '|' -k 1 >> log
+cat log_tmp >> log
+echo "-------------------------------------------- end --------------------------------------------" >> log
